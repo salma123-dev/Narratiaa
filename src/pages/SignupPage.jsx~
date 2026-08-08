@@ -1,0 +1,69 @@
+import "./SignupPage.css";
+import bg from "../assets/narratiaa-bg.png";
+
+export default function SignupPage() {
+    return (
+        <main className="signup-page" style={{ backgroundImage: `url(${bg})` }}>
+            <section className="brand">
+                <div className="logo">📖</div>
+                <h1>NARRATIAA</h1>
+                <div className="separator" />
+                <p>Every story deserves a voice.</p>
+
+                <blockquote>
+                    “<br />
+                    Between the pages
+                    <br />
+                    lives another world.
+                    <br />”
+                </blockquote>
+            </section>
+
+            <section className="card">
+                <div className="icon">🪶</div>
+
+                <h2>Create your account</h2>
+                <div className="small-separator" />
+                <p className="subtitle">Start your journey with Narratiaa.</p>
+
+                <form>
+                    <div className="input-group">
+                        <span>♡</span>
+                        <input type="text" placeholder="Full Name" />
+                    </div>
+
+                    <div className="input-group">
+                        <span>✉</span>
+                        <input type="email" placeholder="Email Address" />
+                    </div>
+
+                    <div className="input-group">
+                        <span>🔒</span>
+                        <input type="password" placeholder="Password" />
+                        <span>👁</span>
+                    </div>
+
+                    <button type="submit">
+                        Create Account <span>→</span>
+                    </button>
+                </form>
+
+                <div className="divider">
+                    <span></span>
+                    <p>or sign up with</p>
+                    <span></span>
+                </div>
+
+                <div className="socials">
+                    <button>G</button>
+                    <button>f</button>
+                    <button></button>
+                </div>
+
+                <p className="signin">
+                    Already have an account? <a href="#">Sign in</a>
+                </p>
+            </section>
+        </main>
+    );
+}
