@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: narratiaa-web
+    runtime: docker
+    dockerfilePath: ./infrastructure/Dockerfile
+    region: frankfurt
+    plan: starter
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: COOKIE_SECURE
+        value: true
+      - key: DB_HOST
+        fromDatabase:
+          name: narratiaa-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: narratiaa-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: narratiaa-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: narratiaa-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: narratiaa-db
+          property: password
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+
+databases:
+  - name: narratiaa-db
+    region: frankfurt
+    plan: basic-256mb
+    databaseName: narratiaa
+    user: narratiaa
+    ipAllowList: []

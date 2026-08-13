@@ -1,0 +1,55 @@
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100svh;
+  margin: 0;
+}
+
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #050711;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #080a11;
+}
+
+body::-webkit-scrollbar-thumb {
+  border: 2px solid #080a11;
+  border-radius: 10px;
+  background: #8d642f;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: #d09a4d;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app-loading {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  color: #ffd895;
+  background: #050711;
+  font: 24px Georgia, serif;
+  letter-spacing: 8px;
+}

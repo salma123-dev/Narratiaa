@@ -1,0 +1,12 @@
+{
+  "name": "@narratiaa/tools",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "transfer": "node sqlite-to-postgres.js"
+  },
+  "dependencies": {
+    "pg": "^8.23.0"
+  }
+}

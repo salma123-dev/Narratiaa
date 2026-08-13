@@ -1,0 +1,572 @@
+openapi: 3.1.0
+info:
+  title: Narratiaa API
+  version: 1.0.0
+  description: API de gestion de lecture personnelle Narratiaa.
+servers:
+  - url: http://localhost:3107/api
+    description: Développement local
+tags:
+  - name: Authentication
+  - name: Onboarding
+  - name: Books
+  - name: Reading sessions
+  - name: Journal
+  - name: Goals and statistics
+  - name: Catalog
+security:
+  - sessionCookie: []
+paths:
+  /auth/send-verification:
+    post:
+      tags: [Authentication]
+      summary: Envoyer un code de vérification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmailRequest' }
+      responses:
+        '200': { description: Code envoyé ou fourni localement, content: { application/json: { schema: { $ref: '#/components/schemas/VerificationDelivery' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '502': { $ref: '#/components/responses/ExternalServiceError' }
+  /auth/verify-email:
+    post:
+      tags: [Authentication]
+      summary: Confirmer le code de vérification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email: { type: string, format: email }
+                code: { type: string, pattern: '^[0-9]{6}$', example: '728233' }
+      responses:
+        '200':
+          description: E-mail vérifié
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  verificationToken: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Créer un compte
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201': { description: Compte créé, headers: { Set-Cookie: { schema: { type: string } } }, content: { application/json: { schema: { $ref: '#/components/schemas/UserEnvelope' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Se connecter
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '200': { description: Connecté, headers: { Set-Cookie: { schema: { type: string } } }, content: { application/json: { schema: { $ref: '#/components/schemas/UserEnvelope' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Lire l’utilisateur courant
+      security: []
+      responses:
+        '200': { description: Utilisateur courant, content: { application/json: { schema: { $ref: '#/components/schemas/UserEnvelope' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Se déconnecter
+      security: []
+      responses:
+        '200': { $ref: '#/components/responses/Message' }
+  /onboarding:
+    get:
+      tags: [Onboarding]
+      summary: Lire le profil d’onboarding
+      responses:
+        '200':
+          description: Profil et objectifs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profile: { $ref: '#/components/schemas/ReaderProfile' }
+                  goal: { $ref: '#/components/schemas/Goal' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      tags: [Onboarding]
+      summary: Terminer l’onboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OnboardingRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Message' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /books:
+    get:
+      tags: [Books]
+      summary: Lister la bibliothèque
+      responses:
+        '200':
+          description: Livres
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  books: { type: array, items: { $ref: '#/components/schemas/Book' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Books]
+      summary: Ajouter un livre
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookInput' }
+      responses:
+        '201': { description: Livre créé, content: { application/json: { schema: { $ref: '#/components/schemas/BookEnvelope' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /books/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Books]
+      summary: Lire un livre et ses sessions
+      responses:
+        '200':
+          description: Livre et historique
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  book: { $ref: '#/components/schemas/Book' }
+                  sessions: { type: array, items: { $ref: '#/components/schemas/ReadingSession' } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Books]
+      summary: Modifier un livre
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookInput' }
+      responses:
+        '200': { description: Livre modifié, content: { application/json: { schema: { $ref: '#/components/schemas/BookEnvelope' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Books]
+      summary: Supprimer définitivement un livre
+      responses:
+        '200': { $ref: '#/components/responses/Message' }
+  /books/{id}/sessions:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [Reading sessions]
+      summary: Enregistrer une session de lecture
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReadingSessionInput' }
+      responses:
+        '201':
+          description: Session créée et progression actualisée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session: { $ref: '#/components/schemas/ReadingSession' }
+                  book: { $ref: '#/components/schemas/Book' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /reading-sessions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Reading sessions]
+      summary: Consulter une session de lecture
+      responses:
+        '200':
+          description: Session
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { session: { $ref: '#/components/schemas/ReadingSession' } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Reading sessions]
+      summary: Modifier une session et recalculer la progression
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReadingSessionInput' }
+      responses:
+        '200':
+          description: Session et livre actualisés
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session: { $ref: '#/components/schemas/ReadingSession' }
+                  book: { $ref: '#/components/schemas/Book' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Reading sessions]
+      summary: Supprimer une session et recalculer la progression
+      responses:
+        '200':
+          description: Session supprimée et livre actualisé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  book: { $ref: '#/components/schemas/Book' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /journal:
+    get:
+      tags: [Journal]
+      summary: Lister le journal
+      responses:
+        '200':
+          description: Entrées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries: { type: array, items: { $ref: '#/components/schemas/JournalEntry' } }
+    post:
+      tags: [Journal]
+      summary: Créer une note ou citation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/JournalInput' }
+      responses:
+        '201':
+          description: Entrée créée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { id: { type: integer } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /journal/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Journal]
+      summary: Consulter une entrée
+      responses:
+        '200':
+          description: Entrée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { entry: { $ref: '#/components/schemas/JournalEntry' } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Journal]
+      summary: Modifier une entrée
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/JournalInput' }
+      responses:
+        '200':
+          description: Entrée actualisée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { entry: { $ref: '#/components/schemas/JournalEntry' } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Journal]
+      summary: Supprimer une entrée
+      responses:
+        '200': { $ref: '#/components/responses/Message' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /goals:
+    get:
+      tags: [Goals and statistics]
+      summary: Lire les objectifs
+      responses:
+        '200':
+          description: Objectifs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { goal: { $ref: '#/components/schemas/Goal' } }
+    put:
+      tags: [Goals and statistics]
+      summary: Modifier les objectifs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Goal' }
+      responses:
+        '200':
+          description: Objectifs modifiés
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { goal: { $ref: '#/components/schemas/Goal' } }
+  /stats:
+    get:
+      tags: [Goals and statistics]
+      summary: Lire les statistiques
+      responses:
+        '200':
+          description: Statistiques calculées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { stats: { $ref: '#/components/schemas/Stats' } }
+  /catalog/search:
+    get:
+      tags: [Catalog]
+      summary: Rechercher dans Open Library
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 2 }
+      responses:
+        '200':
+          description: Résultats normalisés
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results: { type: array, items: { $ref: '#/components/schemas/CatalogBook' } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '502': { $ref: '#/components/responses/ExternalServiceError' }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: narratiaa_session
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+  responses:
+    Message:
+      description: Opération réussie
+      content: { application/json: { schema: { $ref: '#/components/schemas/Message' } } }
+    BadRequest:
+      description: Données invalides
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unauthorized:
+      description: Session absente ou expirée
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: Ressource introuvable
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Conflict:
+      description: Ressource déjà existante
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    ExternalServiceError:
+      description: Service externe indisponible
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+  schemas:
+    Message:
+      type: object
+      required: [message]
+      properties: { message: { type: string } }
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+        errors: { type: object, additionalProperties: { type: string } }
+        duplicateId: { type: integer }
+    EmailRequest:
+      type: object
+      required: [email]
+      properties: { email: { type: string, format: email } }
+    VerificationDelivery:
+      type: object
+      properties:
+        message: { type: string }
+        development: { type: boolean }
+        developmentCode: { type: string, pattern: '^[0-9]{6}$' }
+    RegisterRequest:
+      type: object
+      required: [fullName, email, password, confirmPassword, emailVerificationToken]
+      properties:
+        fullName: { type: string, minLength: 2 }
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 8 }
+        confirmPassword: { type: string, format: password }
+        emailVerificationToken: { type: string }
+    User:
+      type: object
+      required: [id, fullName, email, onboardingCompleted]
+      properties:
+        id: { type: integer }
+        fullName: { type: string }
+        email: { type: string, format: email }
+        onboardingCompleted: { type: integer, enum: [0, 1] }
+    UserEnvelope:
+      type: object
+      properties: { user: { $ref: '#/components/schemas/User' } }
+    ReaderProfile:
+      type: object
+      properties:
+        favoriteGenres: { type: string, example: 'Fantasy,History' }
+        onboardingCompleted: { type: integer, enum: [0, 1] }
+    OnboardingRequest:
+      type: object
+      required: [favoriteGenres, dailyType, dailyTarget, annualBooks]
+      properties:
+        favoriteGenres: { type: array, items: { type: string } }
+        dailyType: { type: string, enum: [pages, minutes] }
+        dailyTarget: { type: integer, minimum: 1 }
+        annualBooks: { type: integer, minimum: 1 }
+    BookInput:
+      type: object
+      required: [title, author]
+      properties:
+        title: { type: string }
+        author: { type: string }
+        genre: { type: string }
+        description: { type: string }
+        coverUrl: { type: string }
+        totalPages: { type: integer, minimum: 1, default: 1 }
+        currentPage: { type: integer, minimum: 0, default: 0 }
+        status: { type: string, enum: [want_to_read, reading, completed, abandoned] }
+        favorite: { type: boolean }
+        startedAt: { type: [string, 'null'], format: date }
+        finishedAt: { type: [string, 'null'], format: date }
+    Book:
+      allOf:
+        - $ref: '#/components/schemas/BookInput'
+        - type: object
+          properties:
+            id: { type: integer }
+            createdAt: { type: string }
+            updatedAt: { type: string }
+    BookEnvelope:
+      type: object
+      properties: { book: { $ref: '#/components/schemas/Book' } }
+    ReadingSessionInput:
+      type: object
+      required: [endPage, minutes]
+      properties:
+        endPage: { type: integer, minimum: 0 }
+        minutes: { type: integer, minimum: 1 }
+        readAt: { type: string, format: date-time }
+    ReadingSession:
+      allOf:
+        - $ref: '#/components/schemas/ReadingSessionInput'
+        - type: object
+          properties:
+            id: { type: integer }
+            startPage: { type: integer }
+    JournalInput:
+      type: object
+      required: [content]
+      properties:
+        bookId: { type: integer }
+        type: { type: string, enum: [note, quote] }
+        content: { type: string }
+        pageNumber: { type: [integer, 'null'], minimum: 1 }
+        tags: { type: string }
+    JournalEntry:
+      allOf:
+        - $ref: '#/components/schemas/JournalInput'
+        - type: object
+          properties:
+            id: { type: integer }
+            bookTitle: { type: string }
+            createdAt: { type: string }
+            updatedAt: { type: string }
+    Goal:
+      type: object
+      required: [dailyType, dailyTarget, annualBooks]
+      properties:
+        dailyType: { type: string, enum: [pages, minutes] }
+        dailyTarget: { type: integer, minimum: 1 }
+        annualBooks: { type: integer, minimum: 1 }
+    Activity:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        pages: { type: integer }
+        minutes: { type: integer }
+    Stats:
+      type: object
+      properties:
+        totalBooks: { type: integer }
+        completedBooks: { type: integer }
+        libraryPages: { type: integer }
+        pagesRead: { type: integer }
+        minutesRead: { type: integer }
+        today: { $ref: '#/components/schemas/Activity' }
+        activity: { type: array, items: { $ref: '#/components/schemas/Activity' } }
+        streak: { type: integer }
+        completedThisYear: { type: integer }
+        goal: { $ref: '#/components/schemas/Goal' }
+    CatalogBook:
+      type: object
+      properties:
+        externalId: { type: string }
+        title: { type: string }
+        author: { type: string }
+        genre: { type: string }
+        description: { type: string }
+        coverUrl: { type: string, format: uri }
+        totalPages: { type: integer }
