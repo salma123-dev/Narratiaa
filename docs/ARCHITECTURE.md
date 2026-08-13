@@ -20,6 +20,7 @@ narratiaa/
 ├── infrastructure/          Docker, Compose et Render
 ├── storage/legacy/          ancienne base SQLite locale
 ├── tools/                   scripts de développement
+├── render.yaml              Blueprint Render
 ├── .env.example
 ├── package.json             commandes globales
 └── README.md

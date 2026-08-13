@@ -1,11 +1,11 @@
 # Déploiement de Narratiaa sur Render
 
-Le Blueprint se trouve dans `infrastructure/render.yaml`. Il crée le service Docker Spring Boot et la base PostgreSQL managée.
+Le Blueprint `render.yaml` se trouve à la racine afin d’être détecté automatiquement. Il crée le service Docker Spring Boot et la base PostgreSQL managée.
 
 ## Déployer
 
 1. Pousser le dépôt sur GitHub ou GitLab.
-2. Créer un Blueprint Render à partir de `infrastructure/render.yaml`.
+2. Dans Render, choisir **New → Blueprint** puis sélectionner le dépôt.
 3. Renseigner `RESEND_API_KEY` et `EMAIL_FROM`.
 4. Attendre la construction de l’image et les migrations Flyway.
 5. Vérifier `https://<service>.onrender.com/api/health`.

@@ -3,6 +3,7 @@ services:
     name: narratiaa-web
     runtime: docker
     dockerfilePath: ./infrastructure/Dockerfile
+    dockerContext: .
     region: frankfurt
     plan: starter
     healthCheckPath: /api/health
