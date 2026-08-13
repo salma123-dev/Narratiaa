@@ -90,6 +90,8 @@ Sans clé Resend, le code de vérification est affiché localement. Pour envoyer
 
 Render détecte automatiquement le fichier `render.yaml` à la racine. Le Blueprint crée un service Docker Spring Boot et une base PostgreSQL. Ajoutez `RESEND_API_KEY` et `EMAIL_FROM` comme secrets dans Render, jamais dans GitHub.
 
+La configuration gratuite convient à une démonstration : le service peut s’endormir après 15 minutes et PostgreSQL expire après 30 jours. Ne l’utilisez pas pour conserver durablement les données d’utilisateurs réels.
+
 Après le déploiement, vérifiez `/api/health`, puis testez l’inscription, l’onboarding, la bibliothèque, une session de lecture, le journal, les statistiques et la reconnexion.
 
 ## Sécurité

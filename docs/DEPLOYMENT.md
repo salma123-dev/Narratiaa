@@ -2,6 +2,8 @@
 
 Le Blueprint `render.yaml` se trouve à la racine afin d’être détecté automatiquement. Il crée le service Docker Spring Boot et la base PostgreSQL managée.
 
+Le Blueprint utilise les instances gratuites pour le prototype. Le service web s’arrête après 15 minutes sans trafic et redémarre à la requête suivante. La base PostgreSQL gratuite expire après 30 jours, ne fournit aucune sauvegarde et doit être remplacée par une base durable avant l’ouverture publique.
+
 ## Déployer
 
 1. Pousser le dépôt sur GitHub ou GitLab.
