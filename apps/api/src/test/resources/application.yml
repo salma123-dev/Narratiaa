@@ -7,5 +7,4 @@ spring:
     enabled: false
 narratiaa:
   cookie-secure: false
-  resend-api-key: ""
   email-from: test@narratiaa.local

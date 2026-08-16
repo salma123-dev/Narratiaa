@@ -7,6 +7,7 @@ import jakarta.validation.constraints.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.time.*;
 import java.util.*;
@@ -19,6 +20,8 @@ public class AuthController {
   public record VerifyBody(@NotBlank String email,@NotBlank String code){}
   public record RegisterBody(@NotBlank @Size(min=2,message="Enter at least 2 characters.")String fullName,@NotBlank @Email(message="Enter a valid email address.")String email,@NotBlank @Size(min=8,message="Use at least 8 characters.")String password,@NotBlank String confirmPassword,@NotBlank String emailVerificationToken){}
   public record LoginBody(@NotBlank String email,@NotBlank String password){}
+  public record ResetPasswordBody(@NotBlank @Email(message="Enter a valid email address.")String email,@NotBlank String code){}
+  public record NewPasswordBody(@NotBlank @Email(message="Enter a valid email address.")String email,@NotBlank String resetToken,@NotBlank @Size(min=8,message="Use at least 8 characters.")String password,@NotBlank String confirmPassword){}
 
   private ResponseCookie cookie(String value,long maxAge){return ResponseCookie.from(AuthService.COOKIE,value).httpOnly(true).secure(secure).sameSite("Strict").path("/").maxAge(maxAge).build();}
   @GetMapping("/me") public Map<String,Object> me(HttpServletRequest req){return Map.of("user",auth.requireUser(req));}
@@ -46,4 +49,25 @@ public class AuthController {
     if(rows.isEmpty()||!auth.passwordMatches(b.password(),(String)rows.getFirst()[3],(String)rows.getFirst()[4]))throw new ApiException(HttpStatus.UNAUTHORIZED,"Incorrect email or password.");var r=rows.getFirst();var user=new AuthService.User((long)r[0],(String)r[1],(String)r[2],(int)r[5]);var session=auth.createSession(user.id());return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,cookie(session.token(),session.maxAge()).toString()).body(Map.of("user",user));
   }
   @PostMapping("/logout") public ResponseEntity<Map<String,String>> logout(HttpServletRequest req){auth.deleteSession((String)req.getAttribute("narratiaaToken"));return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,cookie("",0).toString()).body(Map.of("message","Signed out."));}
+
+  @PostMapping("/forgot-password") public Map<String,Object> forgotPassword(@Valid @RequestBody EmailBody body){
+    String address=auth.normalizeEmail(body.email());
+    var out=new LinkedHashMap<String,Object>();out.put("message","If an account exists for this email, a reset code has been sent.");
+    if(!auth.emailExists(address))return out;
+    String code=auth.verificationCode();db.update("INSERT INTO password_resets(email,code_hash,token_hash,expires_at,verified_at,attempts,created_at) VALUES(?,?,NULL,?,NULL,0,CURRENT_TIMESTAMP) ON CONFLICT(email) DO UPDATE SET code_hash=excluded.code_hash,token_hash=NULL,expires_at=excluded.expires_at,verified_at=NULL,attempts=0,created_at=CURRENT_TIMESTAMP",address,auth.sha256(code),OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(10));
+    try{boolean dev=email.sendPasswordReset(address,code);out.put("development",dev);if(dev)out.put("developmentCode",code);return out;}catch(RuntimeException e){db.update("DELETE FROM password_resets WHERE email=?",address);throw e;}
+  }
+  @PostMapping("/verify-reset-code") public Map<String,Object> verifyResetCode(@Valid @RequestBody ResetPasswordBody body){
+    String address=auth.normalizeEmail(body.email());var rows=db.query("SELECT code_hash,expires_at,attempts FROM password_resets WHERE email=?",(rs,n)->Map.of("hash",rs.getString(1),"expires",rs.getObject(2,OffsetDateTime.class),"attempts",rs.getInt(3)),address);
+    if(rows.isEmpty()||((OffsetDateTime)rows.getFirst().get("expires")).isBefore(OffsetDateTime.now()))throw new ApiException(HttpStatus.BAD_REQUEST,"The reset code has expired. Request a new one.");
+    if((int)rows.getFirst().get("attempts")>=5)throw new ApiException(HttpStatus.BAD_REQUEST,"Too many attempts. Request a new code.");
+    if(!rows.getFirst().get("hash").equals(auth.sha256(body.code().trim()))){db.update("UPDATE password_resets SET attempts=attempts+1 WHERE email=?",address);throw new ApiException(HttpStatus.BAD_REQUEST,"The reset code is incorrect.");}
+    String token=UUID.randomUUID()+"-"+UUID.randomUUID();db.update("UPDATE password_resets SET token_hash=?,verified_at=CURRENT_TIMESTAMP WHERE email=?",auth.sha256(token),address);return Map.of("message","Code confirmed.","resetToken",token);
+  }
+  @Transactional
+  @PostMapping("/reset-password") public Map<String,String> resetPassword(@Valid @RequestBody NewPasswordBody body){
+    var errors=new LinkedHashMap<String,String>();if(!body.password().matches(".*[A-Za-z].*")||!body.password().matches(".*\\d.*"))errors.put("password","Include at least one letter and one number.");if(!body.password().equals(body.confirmPassword()))errors.put("confirmPassword","Passwords do not match.");if(!errors.isEmpty())throw new ApiException(HttpStatus.BAD_REQUEST,"Check the form fields.",errors);
+    String address=auth.normalizeEmail(body.email());Integer valid=db.query("SELECT 1 FROM password_resets WHERE email=? AND token_hash=? AND verified_at IS NOT NULL AND expires_at>CURRENT_TIMESTAMP",rs->rs.next()?1:null,address,auth.sha256(body.resetToken()));if(valid==null)throw new ApiException(HttpStatus.BAD_REQUEST,"This reset request is invalid or has expired.");
+    String salt=auth.passwordSalt();db.update("UPDATE users SET password_hash=?,password_salt=? WHERE email=?",auth.passwordHash(body.password(),salt),salt,address);db.update("DELETE FROM sessions WHERE user_id=(SELECT id FROM users WHERE email=?)",address);db.update("DELETE FROM password_resets WHERE email=?",address);return Map.of("message","Your password has been changed. You can now sign in.");
+  }
 }

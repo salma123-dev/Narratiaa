@@ -482,8 +482,11 @@ Variables optionnelles/nécessaires :
 
 ```env
 PORT=3107
-RESEND_API_KEY=re_your_api_key
-EMAIL_FROM=Narratiaa <verify@your-domain.com>
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=narratiaa.app@gmail.com
+MAIL_PASSWORD=your_google_app_password
+EMAIL_FROM=Narratiaa <narratiaa.app@gmail.com>
 NODE_ENV=production
 ```
 

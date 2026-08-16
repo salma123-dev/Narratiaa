@@ -16,6 +16,21 @@ spring:
     baseline-version: 0
   jackson:
     default-property-inclusion: non_null
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
 management:
   endpoints:
     web:
@@ -23,5 +38,4 @@ management:
         include: health,info
 narratiaa:
   cookie-secure: ${COOKIE_SECURE:false}
-  resend-api-key: ${RESEND_API_KEY:}
-  email-from: ${EMAIL_FROM:Narratiaa <onboarding@resend.dev>}
+  email-from: ${EMAIL_FROM:${MAIL_USERNAME:}}

@@ -560,6 +560,10 @@ form {
     text-decoration: none;
 }
 
+.reset-card { width: 455px; }
+.reset-submit { padding-left: 24px; }
+.reset-success { display: block; margin: 0 0 18px; text-align: center; }
+
 @media (max-width: 1180px) {
     .signup-page {
         justify-content: center;

@@ -37,3 +37,15 @@ export async function login(fields) {
 export async function logout() {
     await request("/api/auth/logout", { method: "POST" });
 }
+
+export async function requestPasswordReset(email) {
+    return request("/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+}
+
+export async function verifyPasswordResetCode(email, code) {
+    return request("/api/auth/verify-reset-code", { method: "POST", body: JSON.stringify({ email, code }) });
+}
+
+export async function resetPassword(fields) {
+    return request("/api/auth/reset-password", { method: "POST", body: JSON.stringify(fields) });
+}

@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS password_resets (
+  email TEXT PRIMARY KEY REFERENCES users(email) ON DELETE CASCADE,
+  code_hash TEXT NOT NULL,
+  token_hash TEXT,
+  expires_at TIMESTAMPTZ NOT NULL,
+  verified_at TIMESTAMPTZ,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

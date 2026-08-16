@@ -60,7 +60,7 @@ Services locaux :
 - API : [http://localhost:3107/api](http://localhost:3107/api) ;
 - santé : [http://localhost:3107/api/health](http://localhost:3107/api/health).
 
-Sans clé Resend, le code de vérification est affiché localement. Pour envoyer de vrais e-mails, renseignez `RESEND_API_KEY` et `EMAIL_FROM` dans `.env`.
+Sans identifiants SMTP, le code de vérification est affiché localement. Pour envoyer de vrais e-mails, renseignez `MAIL_USERNAME`, `MAIL_PASSWORD` et `EMAIL_FROM` dans `.env`.
 
 ## Commandes
 
@@ -88,7 +88,7 @@ Sans clé Resend, le code de vérification est affiché localement. Pour envoyer
 
 ## Déploiement
 
-Render détecte automatiquement le fichier `render.yaml` à la racine. Le Blueprint crée un service Docker Spring Boot et une base PostgreSQL. Ajoutez `RESEND_API_KEY` et `EMAIL_FROM` comme secrets dans Render, jamais dans GitHub.
+Render détecte automatiquement le fichier `render.yaml` à la racine. Le Blueprint crée un service Docker Spring Boot et une base PostgreSQL. Ajoutez `MAIL_USERNAME`, `MAIL_PASSWORD` et `EMAIL_FROM` comme secrets dans Render, jamais dans GitHub.
 
 La configuration gratuite convient à une démonstration : le service peut s’endormir après 15 minutes et PostgreSQL expire après 30 jours. Ne l’utilisez pas pour conserver durablement les données d’utilisateurs réels.
 

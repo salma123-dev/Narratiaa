@@ -31,7 +31,13 @@ services:
         fromDatabase:
           name: narratiaa-db
           property: password
-      - key: RESEND_API_KEY
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
         sync: false
       - key: EMAIL_FROM
         sync: false

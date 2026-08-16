@@ -8,7 +8,7 @@ Le Blueprint utilise les instances gratuites pour le prototype. Le service web s
 
 1. Pousser le dépôt sur GitHub ou GitLab.
 2. Dans Render, choisir **New → Blueprint** puis sélectionner le dépôt.
-3. Renseigner `RESEND_API_KEY` et `EMAIL_FROM`.
+3. Renseigner `MAIL_USERNAME`, `MAIL_PASSWORD` et `EMAIL_FROM` pour Gmail SMTP.
 4. Attendre la construction de l’image et les migrations Flyway.
 5. Vérifier `https://<service>.onrender.com/api/health`.
 

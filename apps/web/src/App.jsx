@@ -7,6 +7,7 @@ import BookPage from "./pages/BookPage";
 import JournalPage from "./pages/JournalPage";
 import StatsPage from "./pages/StatsPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { getCurrentUser, logout } from "./services/authApi";
 
 export default function App() {
@@ -26,8 +27,8 @@ export default function App() {
             setUser(currentUser);
             const currentPath = window.location.pathname;
             const nextPath = currentUser
-                ? (currentPath === "/signin" || currentPath === "/signup" ? "/dashboard" : currentPath)
-                : (currentPath === "/signin" || currentPath === "/signup" ? currentPath : "/signin");
+                ? (["/signin", "/signup", "/forgot-password"].includes(currentPath) ? "/dashboard" : currentPath)
+                : (["/signin", "/signup", "/forgot-password"].includes(currentPath) ? currentPath : "/signin");
             if (nextPath !== currentPath) {
                 window.history.replaceState({}, "", nextPath);
                 setPath(nextPath);
@@ -49,7 +50,8 @@ export default function App() {
 
     if (loading) return <div className="app-loading">NARRATIAA</div>;
     if (path === "/signup" && !user) return <SignupPage onAuthenticated={handleAuthenticated} onShowSignin={() => navigate("/signin")} />;
-    if (path === "/signin" && !user) return <SigninPage onAuthenticated={handleAuthenticated} onShowSignup={() => navigate("/signup")} />;
+    if (path === "/signin" && !user) return <SigninPage onAuthenticated={handleAuthenticated} onShowSignup={() => navigate("/signup")} onShowForgotPassword={() => navigate("/forgot-password")} />;
+    if (path === "/forgot-password" && !user) return <ForgotPasswordPage onShowSignin={() => navigate("/signin")} />;
     if (user) {
         const shared = { user, onLogout: handleLogout, onNavigate: navigate };
         if (path === "/onboarding" || !user.onboardingCompleted) return <OnboardingPage {...shared} onComplete={() => { setUser({ ...user, onboardingCompleted: 1 }); navigate("/dashboard"); }} />;
