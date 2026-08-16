@@ -482,15 +482,13 @@ Variables optionnelles/nécessaires :
 
 ```env
 PORT=3107
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=narratiaa.app@gmail.com
-MAIL_PASSWORD=your_google_app_password
-EMAIL_FROM=Narratiaa <narratiaa.app@gmail.com>
+BREVO_API_KEY=xkeysib-your-api-key
+EMAIL_FROM=narratiaa.app@gmail.com
+EMAIL_FROM_NAME=Narratiaa
 NODE_ENV=production
 ```
 
-En développement sans Resend, l’API renvoie un code local. En production, configurez obligatoirement l’envoi réel.
+En développement sans clé Brevo, l’API renvoie un code local. En production, configurez obligatoirement l’envoi réel.
 
 ## 14. Limites actuelles
 

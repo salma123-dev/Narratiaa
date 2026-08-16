@@ -18,7 +18,7 @@ Narratiaa est une application web pour organiser sa bibliothèque, suivre sa pro
 | Web | React 19, Vite 8 |
 | API | Java 21, Spring Boot 4.1 |
 | Données | PostgreSQL, Flyway |
-| E-mails | Resend |
+| E-mails | API transactionnelle Brevo |
 | Production | Docker, Render |
 
 ## Structure
@@ -60,7 +60,7 @@ Services locaux :
 - API : [http://localhost:3107/api](http://localhost:3107/api) ;
 - santé : [http://localhost:3107/api/health](http://localhost:3107/api/health).
 
-Sans identifiants SMTP, le code de vérification est affiché localement. Pour envoyer de vrais e-mails, renseignez `MAIL_USERNAME`, `MAIL_PASSWORD` et `EMAIL_FROM` dans `.env`.
+Sans clé Brevo, le code de vérification est affiché localement. Pour envoyer de vrais e-mails, renseignez `BREVO_API_KEY`, `EMAIL_FROM` et `EMAIL_FROM_NAME` dans `.env`.
 
 ## Commandes
 
@@ -88,7 +88,7 @@ Sans identifiants SMTP, le code de vérification est affiché localement. Pour e
 
 ## Déploiement
 
-Render détecte automatiquement le fichier `render.yaml` à la racine. Le Blueprint crée un service Docker Spring Boot et une base PostgreSQL. Ajoutez `MAIL_USERNAME`, `MAIL_PASSWORD` et `EMAIL_FROM` comme secrets dans Render, jamais dans GitHub.
+Render détecte automatiquement le fichier `render.yaml` à la racine. Le Blueprint crée un service Docker Spring Boot et une base PostgreSQL. Ajoutez `BREVO_API_KEY` et `EMAIL_FROM` comme secrets dans Render, jamais dans GitHub.
 
 La configuration gratuite convient à une démonstration : le service peut s’endormir après 15 minutes et PostgreSQL expire après 30 jours. Ne l’utilisez pas pour conserver durablement les données d’utilisateurs réels.
 

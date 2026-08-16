@@ -31,16 +31,12 @@ services:
         fromDatabase:
           name: narratiaa-db
           property: password
-      - key: MAIL_HOST
-        value: smtp.gmail.com
-      - key: MAIL_PORT
-        value: 587
-      - key: MAIL_USERNAME
-        sync: false
-      - key: MAIL_PASSWORD
+      - key: BREVO_API_KEY
         sync: false
       - key: EMAIL_FROM
         sync: false
+      - key: EMAIL_FROM_NAME
+        value: Narratiaa
 
 databases:
   - name: narratiaa-db

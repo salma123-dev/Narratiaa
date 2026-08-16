@@ -32,7 +32,7 @@ En développement, Vite transmet `/api` à Spring Boot. En production, le fronte
 
 ```text
 React/Vite → Spring Boot REST → PostgreSQL
-                   ├──────────→ Resend
+                   ├──────────→ Brevo API
                    └──────────→ Open Library
 ```
 
