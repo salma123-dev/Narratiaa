@@ -23,7 +23,7 @@ export default function App() {
     useEffect(() => {
         const onPopState = () => setPath(window.location.pathname);
         window.addEventListener("popstate", onPopState);
-        getCurrentUser().then((currentUser) => {
+        getCurrentUser().catch(() => null).then((currentUser) => {
             setUser(currentUser);
             const currentPath = window.location.pathname;
             const nextPath = currentUser

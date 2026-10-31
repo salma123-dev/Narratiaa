@@ -19,7 +19,7 @@ Narratiaa est une application web pour organiser sa bibliothèque, suivre sa pro
 | API | Java 21, Spring Boot 4.1 |
 | Données | PostgreSQL, Flyway |
 | E-mails | API transactionnelle Brevo |
-| Production | Docker, Render |
+| Production | Docker |
 
 ## Structure
 
@@ -34,7 +34,6 @@ narratiaa/
 ├── tools/                scripts de développement
 ├── .env.example          exemple de configuration
 ├── package.json          commandes globales
-├── render.yaml           Blueprint Render
 └── README.md
 ```
 
@@ -84,15 +83,21 @@ Sans clé Brevo, le code de vérification est affiché localement. Pour envoyer 
 - [API REST](docs/API.md)
 - [OpenAPI 3.1](docs/openapi.yaml)
 - [Architecture](docs/ARCHITECTURE.md)
-- [Déploiement Render](docs/DEPLOYMENT.md)
 
-## Déploiement
+## Ancienne base SQLite
 
-Render détecte automatiquement le fichier `render.yaml` à la racine. Le Blueprint crée un service Docker Spring Boot et une base PostgreSQL. Ajoutez `BREVO_API_KEY` et `EMAIL_FROM` comme secrets dans Render, jamais dans GitHub.
+La base historique est conservée dans `storage/legacy`. Pour la transférer :
 
-La configuration gratuite convient à une démonstration : le service peut s’endormir après 15 minutes et PostgreSQL expire après 30 jours. Ne l’utilisez pas pour conserver durablement les données d’utilisateurs réels.
+```powershell
+$env:DATABASE_URL="postgresql://user:password@host:5432/narratiaa"
+npm run db:transfer
+```
 
-Après le déploiement, vérifiez `/api/health`, puis testez l’inscription, l’onboarding, la bibliothèque, une session de lecture, le journal, les statistiques et la reconnexion.
+## Sauvegarde
+
+```powershell
+.\tools\backup-postgres.ps1 -DatabaseUrl "postgresql://..."
+```
 
 ## Sécurité
 
